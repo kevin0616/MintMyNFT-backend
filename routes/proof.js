@@ -5,27 +5,28 @@ const verifySignature = require('../utils/verifySignature');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-router.post('/add', async (req, res) => {
-    const { token_id, creator_address, event_info, proof_hash, signature } = req.body;
+router.post('/create', async (req, res) => {
+    const { event_info, password, address, token_id, creator_address, token_uri } = req.body;
 
-    if (!token_id || !creator_address || !event_info || !proof_hash || !signature) {
-        return res.status(400).json({ error: 'Missing required fields' });
-    }
+    //if (!token_id || !creator_address || !event_info || !proof_hash || !signature) {
+    //    return res.status(400).json({ error: 'Missing required fields' });
+    //}
+    console.log(creator_address)
+    //const message = proof_hash;
+    //if (!verifySignature(message, signature, creator_address)) {
+    //    return res.status(400).json({ error: 'Invalid signature' });
+    //}
 
-    
-    const message = proof_hash;
-    if (!verifySignature(message, signature, creator_address)) {
-        return res.status(400).json({ error: 'Invalid signature' });
-    }
+    //password & address verification(not done)
+    //
 
     const { data, error } = await supabase
-        .from('proofs')
+        .from('Proofs')
         .insert([{
-            token_id,
-            creator_address,
-            proof_hash,
-            signature,
-            event_info,
+            token_id: token_id,
+            creator_address: creator_address,
+            info: event_info,
+            token_uri: token_uri,
             created_at: new Date()
         }])
         .select();
@@ -34,15 +35,13 @@ router.post('/add', async (req, res) => {
     res.json(data[0]);
 });
 
-router.get('/:token_id', async (req, res) => {
-    const { token_id } = req.params;
-
+router.post('/verify', async (req, res) => {
+    const { wallet_address } = req.body;
     const { data, error } = await supabase
-        .from('proofs')
+        .from('Proofs')
         .select('*')
-        .eq('token_id', token_id)
-        .order('created_at', { ascending: true });
-
+        .eq('creator_address', wallet_address)
+        .is('signature', null)
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
 });
