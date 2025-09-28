@@ -18,7 +18,6 @@ router.post('/add', async (req, res) => {
         return res.status(400).json({ error: 'Invalid signature' });
     }
 
-    // 存入 Supabase
     const { data, error } = await supabase
         .from('proofs')
         .insert([{
@@ -35,7 +34,6 @@ router.post('/add', async (req, res) => {
     res.json(data[0]);
 });
 
-// 查詢 NFT 的所有 proofs
 router.get('/:token_id', async (req, res) => {
     const { token_id } = req.params;
 
