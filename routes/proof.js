@@ -6,7 +6,7 @@ const verifySignature = require('../utils/verifySignature');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 router.post('/create', async (req, res) => {
-    const { event_info, password, address, token_id, creator_address, token_uri } = req.body;
+    const { tag, event_info, address, token_id, creator_address, token_uri } = req.body;
 
     //if (!token_id || !creator_address || !event_info || !proof_hash || !signature) {
     //    return res.status(400).json({ error: 'Missing required fields' });
@@ -27,7 +27,8 @@ router.post('/create', async (req, res) => {
             creator_address: creator_address,
             info: event_info,
             token_uri: token_uri,
-            created_at: new Date()
+            created_at: new Date(),
+            tag: tag,
         }])
         .select();
 
@@ -35,13 +36,12 @@ router.post('/create', async (req, res) => {
     res.json(data[0]);
 });
 
-router.post('/verify', async (req, res) => {
-    const { wallet_address } = req.body;
+router.post('/list', async (req, res) => {
+    const { token_id } = req.body;
     const { data, error } = await supabase
         .from('Proofs')
         .select('*')
-        .eq('creator_address', wallet_address)
-        .is('signature', null)
+        .eq('token_id', token_id)
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
 });
